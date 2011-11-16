@@ -1,0 +1,62 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
+    <modelVersion>4.0.0</modelVersion>
+
+    <!--
+     | POM Relationships
+     -->
+
+    <parent>
+        <groupId>net.codjo.pom</groupId>
+        <artifactId>codjo-pom-library</artifactId>
+        <version>SNAPSHOT</version>
+    </parent>
+    <groupId>net.codjo.test</groupId>
+    <artifactId>codjo-test</artifactId>
+    <version>3.58-SNAPSHOT</version>
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>net.codjo.test</groupId>
+                <artifactId>codjo-test-common</artifactId>
+                <!--
+                UGLY : Marche pas il faut spécifier une version.
+                       Est-ce un bug car utilisé via le plugin test-release ?
+                       cf. http://jira.codehaus.org/browse/MNG-2653
+                -->
+                <!-- <version>${pom.version}</version> -->
+                <version>3.58-SNAPSHOT</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <!--
+    | Project Information
+    -->
+
+    <name>Lib &gt; Composant TEST</name>
+    <description>Composant pour les tests. Regroupement des differentes librairies permettant de faire des
+        tests le plus simplement possible.
+    </description>
+    <inceptionYear>2003</inceptionYear>
+
+    <!--
+    | Build Settings
+    -->
+
+    <packaging>pom</packaging>
+    <modules>
+        <module>codjo-test-common</module>
+    </modules>
+
+    <!--
+    | Environment Information
+    -->
+
+    <scm>
+        <connection>scm:git:https://github.com/codjo/codjo-test.git</connection>
+        <developerConnection>scm:git:https://github.com/codjo/codjo-test.git</developerConnection>
+        <url>https://github.com/codjo/codjo-test</url>
+    </scm>
+
+</project>

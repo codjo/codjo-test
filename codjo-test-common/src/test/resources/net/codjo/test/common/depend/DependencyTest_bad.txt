@@ -1,0 +1,3 @@
+net.codjo.test.common.depend
+    -> junit.framework
+    -> jdepend.textui

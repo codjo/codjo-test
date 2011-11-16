@@ -1,0 +1,27 @@
+
+/* =============================================================== */
+/*   Database name:  TestDataGen                                   */
+/* =============================================================== */
+
+
+if exists (select 1 from  sysobjects where  id = object_id('JDBC_FIXTURE_TEST') and type = 'U')
+begin
+   drop table JDBC_FIXTURE_TEST
+   print 'Table JDBC_FIXTURE_TEST dropped'
+end
+go
+
+/* ============================================================ */
+create table JDBC_FIXTURE_TEST
+(
+    IMPORT_SETTINGS_ID      int  not null,
+    REMOVE_LEFT_ZEROS      bit default 0  not null
+)
+
+go
+
+/* ============================================================ */
+if exists (select 1 from  sysobjects where  id = object_id('JDBC_FIXTURE_TEST') and type = 'U')
+   print 'Table JDBC_FIXTURE_TEST created'
+go
+

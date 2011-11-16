@@ -1,0 +1,5 @@
+net.codjo.agent
+    -> jade.core
+    -> jade.fipa
+net.codjo.agent.jdbc
+    -> jade.jdbc

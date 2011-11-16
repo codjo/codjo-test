@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<entity name="common.test.net.codjo.test.common.data.PM_TEST_TABLE_DEF" table="PM_TEST_TABLE_DEF">
+    <description>Fichier export</description>
+    <feature>
+        <generate-all/>
+    </feature>
+    <properties>
+        <field name="fileId" type="java.lang.Integer">
+            <description>Num&#233;ro de fichier</description>
+            <sql required="true" type="integer"/>
+        </field>
+        <field name="fileName" type="string">
+            <description>Nom du fichier</description>
+            <sql precision="30" type="varchar"/>
+        </field>
+        <field name="destinationSystem" type="string">
+            <description>Syst&#233;me de destination</description>
+            <sql precision="6" type="varchar"/>
+        </field>
+        
+    </properties>
+</entity>
+
