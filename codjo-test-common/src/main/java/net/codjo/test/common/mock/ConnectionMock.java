@@ -18,7 +18,7 @@ import java.util.Map;
 /**
  * Mock une connection en BD.
  */
-public class ConnectionMock implements Connection {
+public class ConnectionMock {//implements Connection {
     private final LogString log;
     private Statement statement = null;
 

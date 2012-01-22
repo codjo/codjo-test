@@ -20,7 +20,7 @@ import java.util.Calendar;
 /**
  *
  */
-public class PreparedStatementMock extends StatementMock implements PreparedStatement {
+public class PreparedStatementMock extends StatementMock {//implements PreparedStatement {
     private LogString log;
 
 

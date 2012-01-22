@@ -27,7 +27,7 @@ import java.util.Map;
  *
  */
 @SuppressWarnings({"OverlyComplexClass"})
-public class ResultSetMock implements ResultSet {
+public class ResultSetMock{//} implements ResultSet {
     private LogString log;
 
 

@@ -14,7 +14,7 @@ import java.util.Arrays;
 /**
  * Mock d'un statment jdbc.
  */
-public class StatementMock implements Statement {
+public class StatementMock {//implements Statement {
     private final LogString log;
     protected ResultSet resultSet;
 

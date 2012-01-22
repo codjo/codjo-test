@@ -8,13 +8,17 @@ import net.codjo.test.common.LogCallAssert;
 import net.codjo.test.common.LogString;
 import junit.framework.TestCase;
 import org.exolab.castor.jdo.Database;
+import org.junit.Before;
+import org.junit.Test;
 /**
  * Classe de test de {@link DatabaseMock}.
  */
-public class DatabaseMockTest extends TestCase {
+public class DatabaseMockTest {
     private DatabaseMock mock;
     private LogString logString;
 
+
+    @Test
     public void test_message() throws Exception {
         LogCallAssert logCallAssert = new LogCallAssert(Database.class);
 
@@ -22,7 +26,7 @@ public class DatabaseMockTest extends TestCase {
     }
 
 
-    @Override
+    @Before
     protected void setUp() throws Exception {
         logString = new LogString();
         mock = new DatabaseMock(logString);

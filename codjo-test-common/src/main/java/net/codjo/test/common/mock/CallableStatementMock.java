@@ -15,7 +15,7 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Map;
-public class CallableStatementMock extends PreparedStatementMock implements CallableStatement {
+public class CallableStatementMock {//extends PreparedStatementMock implements CallableStatement {
     private LogString log;
     private Object object;
 
@@ -26,7 +26,7 @@ public class CallableStatementMock extends PreparedStatementMock implements Call
 
 
     public CallableStatementMock(LogString log) {
-        super(new LogString("statement", log));
+//        super(new LogString("statement", log));
         this.log = log;
     }
 
