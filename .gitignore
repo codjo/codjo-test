@@ -1,6 +1,7 @@
 *.ipr
 *.iws
 *.iml
+.idea
 target
 .svn
 APDescription.txt
