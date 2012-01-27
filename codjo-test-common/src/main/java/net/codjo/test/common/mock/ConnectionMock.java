@@ -4,7 +4,6 @@
  * Copyright (c) 2001 AGF Asset Management.
  */
 package net.codjo.test.common.mock;
-import net.codjo.test.common.LogString;
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -15,16 +14,23 @@ import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.Arrays;
 import java.util.Map;
+import net.codjo.test.common.LogString;
 /**
  * Mock une connection en BD.
  */
-public class ConnectionMock {//implements Connection {
+@SuppressWarnings({"UnusedDeclaration"})
+public class ConnectionMock {
     private final LogString log;
     private Statement statement = null;
 
 
     public ConnectionMock() {
         this(new LogString());
+    }
+
+
+    public Connection get() {
+        return ProxyDelegatorFactory.getConnectionProxy(this, Connection.class);
     }
 
 
