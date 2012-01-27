@@ -13,6 +13,7 @@ public class JDBCMockTest {
 
     @Test
     public void test_connectionProxy() throws Exception {
+
         ConnectionMock connectionMock = new ConnectionMock(logString);
         LogCallAssert<Connection> logCallAssert = new LogCallAssert<Connection>(Connection.class);
         logCallAssert.assertCalls(connectionMock.get(), logString, jdbcJdk5ConnectionMethods());

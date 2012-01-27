@@ -16,6 +16,7 @@ import static net.codjo.test.common.matcher.JUnitMatchers.*;
  * Classe permettant d'appeler par instrospection les méthodes d'une instance et de vérifier l'appel en regardant dans
  * un {@link LogString}.
  */
+
 public class LogCallAssert<T> {
     private final Class aClass;
 

@@ -20,6 +20,7 @@ import net.codjo.test.common.LogString;
  */
 @SuppressWarnings({"UnusedDeclaration"})
 public class ConnectionMock {
+
     private final LogString log;
     private Statement statement = null;
 
