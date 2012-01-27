@@ -26,7 +26,7 @@ public class ProxyDelegatorFactory implements InvocationHandler {
     }
 
 
-    public static <T> T getConnectionProxy(final Object delegate, Class<T> stubClass) {
+    public static <T> T getProxy(final Object delegate, Class<T> stubClass) {
         //noinspection unchecked
         return (T)Proxy.newProxyInstance(stubClass.getClassLoader(),
                                          new Class[]{stubClass},

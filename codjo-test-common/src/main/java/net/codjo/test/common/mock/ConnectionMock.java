@@ -30,8 +30,8 @@ public class ConnectionMock {
     }
 
 
-    public Connection get() {
-        return ProxyDelegatorFactory.getConnectionProxy(this, Connection.class);
+    public Connection getStub() {
+        return ProxyDelegatorFactory.getProxy(this, Connection.class);
     }
 
 

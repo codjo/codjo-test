@@ -22,8 +22,10 @@ import org.exolab.castor.persist.spi.Complex;
 /**
  * Mock un Database testeur.
  */
-public class DatabaseMock implements Database {
+@SuppressWarnings({"UnusedDeclaration"})
+public class DatabaseMock {
     private final LogString log;
+
 
     public DatabaseMock() {
         this(new LogString());
@@ -33,6 +35,12 @@ public class DatabaseMock implements Database {
     public DatabaseMock(LogString connectionLog) {
         log = connectionLog;
     }
+
+
+    public Database getStub() {
+        return ProxyDelegatorFactory.getProxy(this, Database.class);
+    }
+
 
     public String callList() {
         return log.getContent();
@@ -64,58 +72,58 @@ public class DatabaseMock implements Database {
 
 
     public Object load(Class aClass, Object object)
-            throws TransactionNotInProgressException, ObjectNotFoundException, LockNotGrantedException {
+          throws TransactionNotInProgressException, ObjectNotFoundException, LockNotGrantedException {
         log.call("load", aClass, object);
         return null;
     }
 
 
     public Object load(Class aClass, Complex complex)
-            throws ObjectNotFoundException, LockNotGrantedException, TransactionNotInProgressException {
+          throws ObjectNotFoundException, LockNotGrantedException, TransactionNotInProgressException {
         log.call("load", aClass, complex);
         return null;
     }
 
 
     public Object load(Class aClass, Object object, short value)
-            throws TransactionNotInProgressException, ObjectNotFoundException, LockNotGrantedException {
-        return doLoad(aClass, object, new Integer(value));
+          throws TransactionNotInProgressException, ObjectNotFoundException, LockNotGrantedException {
+        return doLoad(aClass, object, (int)value);
     }
 
 
     public Object load(Class aClass, Complex complex, short value)
-            throws ObjectNotFoundException, LockNotGrantedException, TransactionNotInProgressException {
-        return doLoad(aClass, complex, new Integer(value));
+          throws ObjectNotFoundException, LockNotGrantedException, TransactionNotInProgressException {
+        return doLoad(aClass, complex, (int)value);
     }
 
 
     public Object load(Class aClass, Object object, Object o1)
-            throws ObjectNotFoundException, LockNotGrantedException, TransactionNotInProgressException {
+          throws ObjectNotFoundException, LockNotGrantedException, TransactionNotInProgressException {
         return doLoad(aClass, object, o1);
     }
 
 
     public void create(Object object)
-            throws ClassNotPersistenceCapableException, DuplicateIdentityException,
-                TransactionNotInProgressException {
+          throws ClassNotPersistenceCapableException, DuplicateIdentityException,
+                 TransactionNotInProgressException {
         log.call("create", object);
     }
 
 
     public void remove(Object object)
-            throws ObjectNotPersistentException, LockNotGrantedException, TransactionNotInProgressException {
+          throws ObjectNotPersistentException, LockNotGrantedException, TransactionNotInProgressException {
         log.call("remove", object);
     }
 
 
     public void update(Object object)
-            throws ClassNotPersistenceCapableException, TransactionNotInProgressException {
+          throws ClassNotPersistenceCapableException, TransactionNotInProgressException {
         log.call("update", object);
     }
 
 
     public void lock(Object object)
-            throws LockNotGrantedException, ObjectNotPersistentException, TransactionNotInProgressException {
+          throws LockNotGrantedException, ObjectNotPersistentException, TransactionNotInProgressException {
         log.call("lock", object);
     }
 
@@ -182,7 +190,7 @@ public class DatabaseMock implements Database {
 
 
     public void makePersistent(Object object)
-            throws ClassNotPersistenceCapableException, DuplicateIdentityException {
+          throws ClassNotPersistenceCapableException, DuplicateIdentityException {
         log.call("makePersistent", object);
     }
 

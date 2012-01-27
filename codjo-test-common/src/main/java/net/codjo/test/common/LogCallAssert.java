@@ -38,13 +38,16 @@ public class LogCallAssert<T> {
     public void assertCalls(T instance, LogString logString, String[] methodList) throws Exception {
         Set<String> methodsToBeCalled = new HashSet<String>(Arrays.asList(methodList));
 
+        System.out.println("return new String[]{");
         Method[] methods = aClass.getDeclaredMethods();
         for (Method method : methods) {
+            System.out.println("\"" + method.toGenericString() + "\",");
             if (methodsToBeCalled.remove(method.toGenericString())) {
                 assertCall(method, instance, logString);
                 logString.clear();
             }
         }
+        System.out.println("};");
 
         assertThat(methodsToBeCalled.toArray(new String[methodsToBeCalled.size()]), is(new String[0]));
     }
@@ -97,10 +100,23 @@ public class LogCallAssert<T> {
             return Boolean.TRUE;
         }
         else if (int.class == clazz) {
-            return 1;
+            //noinspection RedundantCast
+            return (int)1;
         }
         else if (short.class == clazz) {
             return (short)1;
+        }
+        else if (byte.class == clazz) {
+            return (byte)1;
+        }
+        else if (double.class == clazz) {
+            return (double)1;
+        }
+        else if (float.class == clazz) {
+            return (float)1;
+        }
+        else if (long.class == clazz) {
+            return (long)1;
         }
         else {
             return null;
