@@ -23,8 +23,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 /**
- * Classe permettant de comparer des strings XML sans tenir compte des espaces vide entre les
- * tags.<p>Exemples
+ * Classe permettant de comparer des strings XML sans tenir compte des espaces vide entre les tags.<p>Exemples
  * :<pre>   XmlUtil.assertEquals("&lt;a&gt;   &lt;/a&gt;", "&lt;a/&gt;");</pre></p>
  */
 public final class XmlUtil {
@@ -106,7 +105,9 @@ public final class XmlUtil {
     }
 
 
-    private static void showStringDiff(String expectedTranslated, String actualTranslated) {
+    private static void showStringDiff(String expectedTranslatedWithHeader, String actualTranslatedWithHeader) {
+        String expectedTranslated = expectedTranslatedWithHeader.replaceAll(".*\\?>", "");
+        String actualTranslated = actualTranslatedWithHeader.replaceAll(".*\\?>", "");
         for (int i = 0; i < expectedTranslated.length(); i++) {
             if (!actualTranslated.startsWith(expectedTranslated.substring(0, i))) {
                 int min = Math.max(0, i - MESSAGE_LENGTH);
