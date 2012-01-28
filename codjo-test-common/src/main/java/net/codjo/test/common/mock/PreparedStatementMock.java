@@ -20,6 +20,7 @@ import net.codjo.test.common.LogString;
 /**
  *
  */
+@SuppressWarnings({"UnusedDeclaration"})
 public class PreparedStatementMock extends StatementMock {
     private LogString log;
 
