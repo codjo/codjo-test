@@ -36,6 +36,7 @@ public class PreparedStatementMock extends StatementMock {
     }
 
 
+    @Override
     public PreparedStatement getStub() {
         return ProxyDelegatorFactory.getProxy(this, PreparedStatement.class);
     }

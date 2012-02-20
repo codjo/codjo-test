@@ -38,16 +38,13 @@ public class LogCallAssert<T> {
     public void assertCalls(T instance, LogString logString, String[] methodList) throws Exception {
         Set<String> methodsToBeCalled = new HashSet<String>(Arrays.asList(methodList));
 
-        System.out.println("return new String[]{");
         Method[] methods = aClass.getDeclaredMethods();
         for (Method method : methods) {
-            System.out.println("\"" + method.toGenericString() + "\",");
             if (methodsToBeCalled.remove(method.toGenericString())) {
                 assertCall(method, instance, logString);
                 logString.clear();
             }
         }
-        System.out.println("};");
 
         assertThat(methodsToBeCalled.toArray(new String[methodsToBeCalled.size()]), is(new String[0]));
     }

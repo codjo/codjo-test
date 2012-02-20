@@ -1,5 +1,6 @@
 package net.codjo.test.common.mock;
 import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 /**
@@ -15,14 +16,20 @@ public class ProxyDelegatorFactory implements InvocationHandler {
     }
 
 
-    public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-        // Find the equivalent method in the proxy class.
-        Method m = delegate.getClass().getMethod(method.getName(), method.getParameterTypes());
-        if (m == null) {
-            throw new UnsupportedOperationException("Unsupported method " + method.getName());
+    public Object invoke(Object proxy, Method jdbcMethod, Object[] args) throws Throwable {
+        Method proxyMethod = delegate.getClass().getMethod(jdbcMethod.getName(), jdbcMethod.getParameterTypes());
+        if (proxyMethod == null) {
+            throw new UnsupportedOperationException("Unsupported method " + jdbcMethod.getName());
         }
 
-        return m.invoke(delegate, args);
+        proxyMethod.setAccessible(true);
+        
+        try {
+            return proxyMethod.invoke(delegate, args);
+        }
+        catch (InvocationTargetException e) {
+            throw e.getCause();
+        }
     }
 
 
