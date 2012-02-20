@@ -1,10 +1,13 @@
 package net.codjo.test.common.excel.matchers;
 import java.awt.Color;
 import java.lang.reflect.Modifier;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
 import org.apache.poi.hssf.util.HSSFColor;
 /**
  *
@@ -34,22 +37,18 @@ public class ExcelMatchersUtil {
 
 
     private static String getColor(HSSFColor hssfColor) {
-        for (Entry<String, HSSFColor> stringColorEntry : COLOR_MAP.entrySet()) {
+        Comparator<Entry<String, HSSFColor>> comparator = new Comparator<Entry<String, HSSFColor>>() {
+            public int compare(Entry<String, HSSFColor> o1, Entry<String, HSSFColor> o2) {
+                return o1.getKey().compareTo(o2.getKey());
+            }
+        };
+        Set<Entry<String, HSSFColor>> entries = new TreeSet<Entry<String, HSSFColor>>(comparator);
+        entries.addAll(COLOR_MAP.entrySet());
+        for (Entry<String, HSSFColor> stringColorEntry : entries) {
             if (isEqual(hssfColor, stringColorEntry.getValue())) {
                 return stringColorEntry.getKey();
             }
         }
-//        final HSSFColor color = new HSSFColor(rgb[0], rgb[1], rgb[2]);
-//        String bestColor = color.toString();
-//        double bestHsbDistance = Double.MAX_VALUE;
-//        for (Entry<String, HSSFColor> stringColorEntry : COLOR_MAP.entrySet()) {
-//
-//            double hsbDistance = computeHSBDistance(color, stringColorEntry.getValue());
-//            if (bestHsbDistance > hsbDistance) {
-//                bestColor = stringColorEntry.getKey();
-//                bestHsbDistance = hsbDistance;
-//            }
-//        }
 
         return null;
     }

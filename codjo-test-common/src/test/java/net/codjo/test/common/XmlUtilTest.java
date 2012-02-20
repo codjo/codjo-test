@@ -5,11 +5,12 @@
  */
 package net.codjo.test.common;
 import junit.framework.AssertionFailedError;
+import org.junit.Test;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import org.junit.Test;
 
 public class XmlUtilTest {
 
@@ -47,8 +48,8 @@ public class XmlUtilTest {
         }
         catch (AssertionFailedError afe) {
             assertEquals("\n"
-                         + "expected  = ...?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><a attribute=\"bobo\"/>...\n"
-                         + "but found = ...?xml version=\"1.0\" encoding=\"ISO-8859-1\"?><a attribute=\"bob o\"/>...",
+                         + "expected  = ...<a attribute=\"bobo\"/>...\n"
+                         + "but found = ...<a attribute=\"bob o\"/>...",
                          afe.getMessage());
         }
     }

@@ -6,36 +6,55 @@
 package net.codjo.test.common;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import junit.framework.Assert;
+
+import static net.codjo.test.common.matcher.JUnitMatchers.*;
 /**
- * Classe permettant d'appeler par instrospection les méthodes d'une instance et de vérifier l'appel en
- * regardant dans un {@link LogString}.
+ * Classe permettant d'appeler par instrospection les méthodes d'une instance et de vérifier l'appel en regardant dans
+ * un {@link LogString}.
  */
-public class LogCallAssert {
+
+public class LogCallAssert<T> {
     private final Class aClass;
 
-/**
-     * Constructeur.
-     *
-     * @param aClass Classe contenant les méthodes à appeler.
-     */
-    public LogCallAssert(Class aClass) {
+
+    public LogCallAssert(Class<T> aClass) {
         this.aClass = aClass;
     }
 
-    public void assertCalls(Object instance, LogString logString)
-            throws Exception {
+
+    public void assertCalls(T instance, LogString logString) throws Exception {
         Method[] methods = aClass.getDeclaredMethods();
-        for (int i = 0; i < methods.length; i++) {
-            Method method = methods[i];
+        for (Method method : methods) {
             assertCall(method, instance, logString);
             logString.clear();
         }
     }
 
 
+    public void assertCalls(T instance, LogString logString, String[] methodList) throws Exception {
+        Set<String> methodsToBeCalled = new HashSet<String>(Arrays.asList(methodList));
+
+        System.out.println("return new String[]{");
+        Method[] methods = aClass.getDeclaredMethods();
+        for (Method method : methods) {
+            System.out.println("\"" + method.toGenericString() + "\",");
+            if (methodsToBeCalled.remove(method.toGenericString())) {
+                assertCall(method, instance, logString);
+                logString.clear();
+            }
+        }
+        System.out.println("};");
+
+        assertThat(methodsToBeCalled.toArray(new String[methodsToBeCalled.size()]), is(new String[0]));
+    }
+
+
     protected void assertCall(Method method, Object instance, LogString logString)
-            throws IllegalAccessException, InvocationTargetException {
+          throws IllegalAccessException, InvocationTargetException {
         Class[] parameterTypes = method.getParameterTypes();
 
         Object[] args = getDefaultArgumentFor(parameterTypes);
@@ -43,7 +62,7 @@ public class LogCallAssert {
         method.invoke(instance, args);
 
         Assert.assertEquals(buildAssertMessage(method),
-            method.getName() + "(" + argumentsToString(args) + ")", logString.getContent());
+                            method.getName() + "(" + argumentsToString(args) + ")", logString.getContent());
     }
 
 
@@ -53,9 +72,8 @@ public class LogCallAssert {
 
 
     protected String argumentsToString(Object[] args) {
-        StringBuffer buffer = new StringBuffer();
-        for (int i = 0; i < args.length; i++) {
-            Object arg = args[i];
+        StringBuilder buffer = new StringBuilder();
+        for (Object arg : args) {
             if (buffer.length() > 0) {
                 buffer.append(", ");
             }
@@ -82,10 +100,23 @@ public class LogCallAssert {
             return Boolean.TRUE;
         }
         else if (int.class == clazz) {
-            return new Integer(1);
+            //noinspection RedundantCast
+            return (int)1;
         }
         else if (short.class == clazz) {
-            return new Short((short)1);
+            return (short)1;
+        }
+        else if (byte.class == clazz) {
+            return (byte)1;
+        }
+        else if (double.class == clazz) {
+            return (double)1;
+        }
+        else if (float.class == clazz) {
+            return (float)1;
+        }
+        else if (long.class == clazz) {
+            return (long)1;
         }
         else {
             return null;

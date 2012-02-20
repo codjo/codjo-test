@@ -1,5 +1,4 @@
 package net.codjo.test.common.mock;
-import net.codjo.test.common.LogString;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -17,10 +16,12 @@ import java.sql.SQLException;
 import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
+import net.codjo.test.common.LogString;
 /**
  *
  */
-public class PreparedStatementMock extends StatementMock implements PreparedStatement {
+@SuppressWarnings({"UnusedDeclaration"})
+public class PreparedStatementMock extends StatementMock {
     private LogString log;
 
 
@@ -32,6 +33,11 @@ public class PreparedStatementMock extends StatementMock implements PreparedStat
     public PreparedStatementMock(LogString log) {
         super(new LogString("statement", log));
         this.log = log;
+    }
+
+
+    public PreparedStatement getStub() {
+        return ProxyDelegatorFactory.getProxy(this, PreparedStatement.class);
     }
 
 
@@ -118,17 +124,17 @@ public class PreparedStatementMock extends StatementMock implements PreparedStat
 
 
     public void setAsciiStream(int parameterIndex, InputStream x, int length) throws SQLException {
-        log.call("setAsciiStream", parameterIndex, x);
+        log.call("setAsciiStream", parameterIndex, x, length);
     }
 
 
     public void setUnicodeStream(int parameterIndex, InputStream x, int length) throws SQLException {
-        log.call("setUnicodeStream", parameterIndex, x);
+        log.call("setUnicodeStream", parameterIndex, x, length);
     }
 
 
     public void setBinaryStream(int parameterIndex, InputStream x, int length) throws SQLException {
-        log.call("setBinaryStream", parameterIndex, x);
+        log.call("setBinaryStream", parameterIndex, x, length);
     }
 
 
@@ -138,12 +144,12 @@ public class PreparedStatementMock extends StatementMock implements PreparedStat
 
 
     public void setObject(int parameterIndex, Object x, int targetSqlType, int scale) throws SQLException {
-        log.call("setObject", parameterIndex, x);
+        log.call("setObject", parameterIndex, x, targetSqlType, scale);
     }
 
 
     public void setObject(int parameterIndex, Object x, int targetSqlType) throws SQLException {
-        log.call("setObject", parameterIndex, x);
+        log.call("setObject", parameterIndex, x, targetSqlType);
     }
 
 
@@ -195,27 +201,27 @@ public class PreparedStatementMock extends StatementMock implements PreparedStat
 
 
     public void setDate(int parameterIndex, Date x, Calendar cal) throws SQLException {
-        log.call("", parameterIndex, x, cal);
+        log.call("setDate", parameterIndex, x, cal);
     }
 
 
     public void setTime(int parameterIndex, Time x, Calendar cal) throws SQLException {
-        log.call("", parameterIndex, x, cal);
+        log.call("setTime", parameterIndex, x, cal);
     }
 
 
     public void setTimestamp(int parameterIndex, Timestamp x, Calendar cal) throws SQLException {
-        log.call("", parameterIndex, x, cal);
+        log.call("setTimestamp", parameterIndex, x, cal);
     }
 
 
     public void setNull(int paramIndex, int sqlType, String typeName) throws SQLException {
-        log.call("", paramIndex, sqlType, typeName);
+        log.call("setNull", paramIndex, sqlType, typeName);
     }
 
 
     public void setURL(int parameterIndex, URL x) throws SQLException {
-        log.call("", parameterIndex, x);
+        log.call("setURL", parameterIndex, x);
     }
 
 

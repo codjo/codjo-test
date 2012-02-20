@@ -1,4 +1,12 @@
 package net.codjo.test.common.excel;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
+import java.util.TreeSet;
 import net.codjo.test.common.excel.matchers.AlignmentSheetStyleMatcher;
 import net.codjo.test.common.excel.matchers.BackgroundColorSheetMatcher;
 import net.codjo.test.common.excel.matchers.BoldSheetStyleMatcher;
@@ -10,13 +18,6 @@ import net.codjo.test.common.excel.matchers.ItalicSheetStyleMatcher;
 import net.codjo.test.common.excel.matchers.MarginSizeSheetStyleMatcher;
 import net.codjo.test.common.excel.matchers.MergeRegionSheetStyleMatcher;
 import net.codjo.test.common.excel.matchers.SheetMatcher;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -77,7 +78,7 @@ public class ExcelComparator {
 
 
     private static Map<String, HSSFSheet> getSheetToCompare(HSSFWorkbook excelWorkbook,
-                                                     List<String> sheetNamesToCompare) {
+                                                            List<String> sheetNamesToCompare) {
         Map<String, HSSFSheet> sheetsToCompare = new LinkedHashMap<String, HSSFSheet>();
 
         Filter filter = new DefaultFilter();
@@ -102,7 +103,7 @@ public class ExcelComparator {
             if (!STYLE_MATCHER_LIST.containsKey(matcherToApply)) {
 
                 throw new ExcelMatchingException("Matcher '" + matcherToApply + "' inconnu. "
-                                         + buildAvailableMatcherListString());
+                                                 + buildAvailableMatcherListString());
             }
             else {
                 sheetMatcherList.add(STYLE_MATCHER_LIST.get(matcherToApply));
@@ -112,13 +113,16 @@ public class ExcelComparator {
         return sheetMatcherList;
     }
 
+
     private static String buildAvailableMatcherListString() {
         StringBuilder message = new StringBuilder("Liste des matchers disponibles : ");
-        for (String matcherName : STYLE_MATCHER_LIST.keySet()) {
+        Set<String> strings = new TreeSet<String>(STYLE_MATCHER_LIST.keySet());
+        for (String matcherName : strings) {
             message.append("\n\t - ").append(matcherName);
         }
         return message.append("\n").toString();
     }
+
 
     private interface Filter {
 
