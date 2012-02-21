@@ -1,5 +1,4 @@
 package net.codjo.test.common.mock;
-import net.codjo.test.common.LogString;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -15,7 +14,9 @@ import java.sql.Time;
 import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Map;
-public class CallableStatementMock extends PreparedStatementMock implements CallableStatement {
+import net.codjo.test.common.LogString;
+@SuppressWarnings({"UnusedDeclaration", "OverlyComplexClass"})
+public class CallableStatementMock extends PreparedStatementMock {
     private LogString log;
     private Object object;
 
@@ -28,6 +29,12 @@ public class CallableStatementMock extends PreparedStatementMock implements Call
     public CallableStatementMock(LogString log) {
         super(new LogString("statement", log));
         this.log = log;
+    }
+
+
+    @Override
+    public CallableStatement getStub() {
+        return ProxyDelegatorFactory.getProxy(this, CallableStatement.class);
     }
 
 
@@ -296,6 +303,11 @@ public class CallableStatementMock extends PreparedStatementMock implements Call
     }
 
 
+    public void setAsciiStream(String parameterName, InputStream x, long length) throws SQLException {
+        log.call("setAsciiStream", parameterName, x, length);
+    }
+
+
     public void setBinaryStream(String parameterName, InputStream x, int length) throws SQLException {
         log.call("setBinaryStream", parameterName, x, length);
     }
@@ -349,6 +361,9 @@ public class CallableStatementMock extends PreparedStatementMock implements Call
 
     public boolean getBoolean(String parameterName) throws SQLException {
         log.call("getBoolean", parameterName);
+        if (object == null) {
+            return false;
+        }
         return (Boolean)object;
     }
 

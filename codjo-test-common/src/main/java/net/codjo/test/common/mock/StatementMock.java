@@ -4,17 +4,18 @@
  * Copyright (c) 2001 AGF Asset Management.
  */
 package net.codjo.test.common.mock;
-import net.codjo.test.common.LogString;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.SQLWarning;
 import java.sql.Statement;
 import java.util.Arrays;
+import net.codjo.test.common.LogString;
 /**
  * Mock d'un statment jdbc.
  */
-public class StatementMock implements Statement {
+@SuppressWarnings({"UnusedDeclaration"})
+public class StatementMock {
     private final LogString log;
     protected ResultSet resultSet;
 
@@ -26,6 +27,11 @@ public class StatementMock implements Statement {
 
     public StatementMock(LogString connectionLog) {
         log = connectionLog;
+    }
+
+
+    public Statement getStub() {
+        return ProxyDelegatorFactory.getProxy(this, Statement.class);
     }
 
 
