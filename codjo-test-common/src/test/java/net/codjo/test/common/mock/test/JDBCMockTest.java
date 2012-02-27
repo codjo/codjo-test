@@ -17,7 +17,6 @@ import net.codjo.test.common.mock.StatementMock;
 import org.exolab.castor.jdo.Database;
 import org.junit.Before;
 import org.junit.Test;
-
 import static net.codjo.test.common.matcher.JUnitMatchers.*;
 
 /**
@@ -25,6 +24,13 @@ import static net.codjo.test.common.matcher.JUnitMatchers.*;
  */
 public class JDBCMockTest {
     private LogString logString;
+
+
+    @Test
+    public void test_stubInstanceAreEquals() throws Exception {
+        ConnectionMock mock = new ConnectionMock(logString);
+        assertThat(mock.getStub(), is(mock.getStub()));
+    }
 
 
     @Test
