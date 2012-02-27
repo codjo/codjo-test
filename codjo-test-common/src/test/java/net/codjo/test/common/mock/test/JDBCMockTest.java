@@ -36,10 +36,24 @@ public class JDBCMockTest {
 
 
     @Test
+    public void test_databaseReturnsSameStubInstance() throws Exception {
+        DatabaseMock mock = new DatabaseMock(logString);
+        assertThat(mock.getStub(), sameInstance(mock.getStub()));
+    }
+
+
+    @Test
     public void test_connectionProxy() throws Exception {
         ConnectionMock connectionMock = new ConnectionMock(logString);
         LogCallAssert<Connection> logCallAssert = new LogCallAssert<Connection>(Connection.class);
         logCallAssert.assertCalls(connectionMock.getStub(), logString, jdbcJdk5ConnectionMethods());
+    }
+
+
+    @Test
+    public void test_connectionReturnsSameStubInstance() throws Exception {
+        ConnectionMock mock = new ConnectionMock(logString);
+        assertThat(mock.getStub(), sameInstance(mock.getStub()));
     }
 
 
@@ -85,10 +99,24 @@ public class JDBCMockTest {
 
 
     @Test
+    public void test_statementReturnsSameStubInstance() throws Exception {
+        StatementMock mock = new StatementMock(logString);
+        assertThat(mock.getStub(), sameInstance(mock.getStub()));
+    }
+
+
+    @Test
     public void test_preparedStatementProxy() throws Exception {
         PreparedStatementMock mock = new PreparedStatementMock(logString);
         LogCallAssert<PreparedStatement> logCallAssert = new LogCallAssert<PreparedStatement>(PreparedStatement.class);
         logCallAssert.assertCalls(mock.getStub(), logString, jdbcJdk5PreparedStatementMethods());
+    }
+
+
+    @Test
+    public void test_preparedStatementReturnsSameStubInstance() throws Exception {
+        PreparedStatementMock mock = new PreparedStatementMock(logString);
+        assertThat(mock.getStub(), sameInstance(mock.getStub()));
     }
 
 
@@ -101,10 +129,24 @@ public class JDBCMockTest {
 
 
     @Test
+    public void test_callableStatementReturnsSameStubInstance() throws Exception {
+        CallableStatementMock mock = new CallableStatementMock(logString);
+        assertThat(mock.getStub(), sameInstance(mock.getStub()));
+    }
+
+
+    @Test
     public void test_resultSetProxy() throws Exception {
         ResultSetMock mock = new ResultSetMock(logString);
         LogCallAssert<ResultSet> logCallAssert = new LogCallAssert<ResultSet>(ResultSet.class);
         logCallAssert.assertCalls(mock.getStub(), logString, jdbcJdk5ResultSetMethods());
+    }
+
+
+    @Test
+    public void test_resultSetReturnsSameStubInstance() throws Exception {
+        ResultSetMock mock = new ResultSetMock(logString);
+        assertThat(mock.getStub(), sameInstance(mock.getStub()));
     }
 
 

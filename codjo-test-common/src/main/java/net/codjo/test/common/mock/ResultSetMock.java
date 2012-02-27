@@ -4,19 +4,31 @@
  * Copyright (c) 2001 AGF Asset Management.
  */
 package net.codjo.test.common.mock;
-import net.codjo.test.common.LogString;
 import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.Date;
+import java.sql.Ref;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.SQLWarning;
+import java.sql.Statement;
+import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.Calendar;
 import java.util.Map;
+import net.codjo.test.common.LogString;
 /**
  *
  */
 @SuppressWarnings({"OverlyComplexClass", "UnusedDeclaration"})
-public class ResultSetMock{//} implements ResultSet {
+public class ResultSetMock {
+    private final ResultSet stub = ProxyDelegatorFactory.getProxy(this, ResultSet.class);
     private LogString log;
 
 
@@ -31,7 +43,7 @@ public class ResultSetMock{//} implements ResultSet {
 
 
     public ResultSet getStub() {
-        return ProxyDelegatorFactory.getProxy(this, ResultSet.class);
+        return stub;
     }
 
 
@@ -451,7 +463,7 @@ public class ResultSetMock{//} implements ResultSet {
 
 
     public void updateNull(int columnIndex) throws SQLException {
-        log.call("updateNull",columnIndex);
+        log.call("updateNull", columnIndex);
     }
 
 

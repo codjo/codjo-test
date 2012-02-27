@@ -25,6 +25,7 @@ import org.exolab.castor.persist.spi.Complex;
 @SuppressWarnings({"UnusedDeclaration"})
 public class DatabaseMock {
     private final LogString log;
+    private Database stub = ProxyDelegatorFactory.getProxy(this, Database.class);
 
 
     public DatabaseMock() {
@@ -38,7 +39,7 @@ public class DatabaseMock {
 
 
     public Database getStub() {
-        return ProxyDelegatorFactory.getProxy(this, Database.class);
+        return stub;
     }
 
 
