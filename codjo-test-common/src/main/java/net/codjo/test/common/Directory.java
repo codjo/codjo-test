@@ -20,8 +20,8 @@ public class Directory extends File {
     public void deleteRecursively() throws NotDeletedException {
         final File[] files = listFiles();
         if (null != files) {
-            for (int i = 0; i < files.length; i++) {
-                new Directory(files[i].getPath()).deleteRecursively();
+            for (File file : files) {
+                new Directory(file.getPath()).deleteRecursively();
             }
         }
         delete();
