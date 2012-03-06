@@ -12,16 +12,13 @@ import net.codjo.test.common.mock.CallableStatementMock;
 import net.codjo.test.common.mock.ConnectionMock;
 import net.codjo.test.common.mock.DatabaseMock;
 import net.codjo.test.common.mock.PreparedStatementMock;
+import net.codjo.test.common.mock.ProxyDelegatorFactory;
 import net.codjo.test.common.mock.ResultSetMock;
 import net.codjo.test.common.mock.StatementMock;
 import org.exolab.castor.jdo.Database;
 import org.junit.Before;
 import org.junit.Test;
 import static net.codjo.test.common.matcher.JUnitMatchers.*;
-
-/**
- *
- */
 public class JDBCMockTest {
     private LogString logString;
 
@@ -30,6 +27,20 @@ public class JDBCMockTest {
     public void test_stubInstanceAreEquals() throws Exception {
         ConnectionMock mock = new ConnectionMock(logString);
         assertThat(mock.getStub(), is(mock.getStub()));
+    }
+
+
+    @Test
+    public void test_unknownMethodThrowsUnsupportedOperation() throws Exception {
+        Connection notReallyAConnection = ProxyDelegatorFactory.getProxy(this, Connection.class);
+
+        try {
+            notReallyAConnection.close();
+        }
+        catch (UnsupportedOperationException e) {
+            assertThat(e.getMessage(), is("Proxy >net.codjo.test.common.mock.test.JDBCMockTest<"
+                                          + " does not support method >public abstract void java.sql.Connection.close() throws java.sql.SQLException<"));
+        }
     }
 
 

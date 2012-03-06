@@ -19,10 +19,7 @@ public class ProxyDelegatorFactory implements InvocationHandler {
 
 
     public Object invoke(Object proxy, Method jdbcMethod, Object[] args) throws Throwable {
-        Method proxyMethod = delegate.getClass().getMethod(jdbcMethod.getName(), jdbcMethod.getParameterTypes());
-        if (proxyMethod == null) {
-            throw new UnsupportedOperationException("Unsupported method " + jdbcMethod.getName());
-        }
+        Method proxyMethod = getProxyMethod(jdbcMethod);
 
         proxyMethod.setAccessible(true);
 
@@ -47,6 +44,17 @@ public class ProxyDelegatorFactory implements InvocationHandler {
         return (T)Proxy.newProxyInstance(stubClass.getClassLoader(),
                                          new Class[]{stubClass},
                                          new ProxyDelegatorFactory(delegate));
+    }
+
+
+    private Method getProxyMethod(Method jdbcMethod) {
+        try {
+            return delegate.getClass().getMethod(jdbcMethod.getName(), jdbcMethod.getParameterTypes());
+        }
+        catch (NoSuchMethodException e) {
+            throw new UnsupportedOperationException("Proxy >" + delegate.getClass().getName() + "< "
+                                                    + "does not support method >" + jdbcMethod.toGenericString() + "<");
+        }
     }
 
 
