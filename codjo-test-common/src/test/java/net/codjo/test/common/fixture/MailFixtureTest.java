@@ -13,8 +13,7 @@ import junit.framework.TestCase;
  *
  */
 public class MailFixtureTest extends TestCase {
-
-    private static final int MY_MAIL_PORT = 99;
+    private static final int MY_MAIL_PORT = 9999;
     private MailFixture mailFixture = new MailFixture(MY_MAIL_PORT);
 
 
@@ -164,10 +163,6 @@ public class MailFixtureTest extends TestCase {
 
 
     private void sendMail(String from, String[] to, String subject, String body) throws Exception {
-//        Properties props = new Properties();
-//        props.setProperty("mail.smtp.host", "localhost");
-//        props.setProperty("mail.smtp.port", String.valueOf(mailFixture.getMailPort()));
-
         Session session = Session.getInstance(System.getProperties());
         session.setDebug(true);
 
@@ -177,10 +172,9 @@ public class MailFixtureTest extends TestCase {
         for (String aTo : to) {
             msg.addRecipients(Message.RecipientType.TO, InternetAddress.parse(aTo, false));
         }
-//        msg.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to, false));
 
         msg.setSubject(subject);
-        msg.setContent(body, "text/html; charset=ISO-8859-1");
+        msg.setContent(body, "text/html; charset=" + java.nio.charset.Charset.defaultCharset().name());
 
         msg.setHeader("X-Mailer", "iComp");
         msg.setSentDate(new Date());
