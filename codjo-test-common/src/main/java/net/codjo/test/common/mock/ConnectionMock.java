@@ -20,9 +20,9 @@ import net.codjo.test.common.LogString;
  */
 @SuppressWarnings({"UnusedDeclaration"})
 public class ConnectionMock {
-
     private final LogString log;
     private Statement statement = null;
+    private Connection stub = ProxyDelegatorFactory.getProxy(this, Connection.class);
 
 
     public ConnectionMock() {
@@ -31,7 +31,7 @@ public class ConnectionMock {
 
 
     public Connection getStub() {
-        return ProxyDelegatorFactory.getProxy(this, Connection.class);
+        return stub;
     }
 
 

@@ -17,6 +17,7 @@ import java.util.Map;
 import net.codjo.test.common.LogString;
 @SuppressWarnings({"UnusedDeclaration", "OverlyComplexClass"})
 public class CallableStatementMock extends PreparedStatementMock {
+    private final CallableStatement stub = ProxyDelegatorFactory.getProxy(this, CallableStatement.class);
     private LogString log;
     private Object object;
 
@@ -34,7 +35,7 @@ public class CallableStatementMock extends PreparedStatementMock {
 
     @Override
     public CallableStatement getStub() {
-        return ProxyDelegatorFactory.getProxy(this, CallableStatement.class);
+        return stub;
     }
 
 
@@ -48,8 +49,8 @@ public class CallableStatementMock extends PreparedStatementMock {
     }
 
 
-    public void mockObject(Object o) {
-        object = o;
+    public void mockObject(Object anObject) {
+        object = anObject;
     }
 
 
