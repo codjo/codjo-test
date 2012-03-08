@@ -14,30 +14,13 @@
     <groupId>net.codjo.test</groupId>
     <artifactId>codjo-test</artifactId>
     <version>3.59-SNAPSHOT</version>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>net.codjo.test</groupId>
-                <artifactId>codjo-test-common</artifactId>
-                <!--
-                UGLY : Marche pas il faut spécifier une version.
-                       Est-ce un bug car utilisé via le plugin test-release ?
-                       cf. http://jira.codehaus.org/browse/MNG-2653
-                -->
-                <!-- <version>${pom.version}</version> -->
-                <version>3.59-SNAPSHOT</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
 
     <!--
     | Project Information
     -->
 
     <name>Lib &gt; Composant TEST</name>
-    <description>Composant pour les tests. Regroupement des differentes librairies permettant de faire des
-        tests le plus simplement possible.
-    </description>
+    <description>Common utility classes for unit testing</description>
     <inceptionYear>2003</inceptionYear>
 
     <!--
