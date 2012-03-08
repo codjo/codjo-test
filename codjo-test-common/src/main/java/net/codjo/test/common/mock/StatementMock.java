@@ -17,6 +17,7 @@ import net.codjo.test.common.LogString;
 @SuppressWarnings({"UnusedDeclaration"})
 public class StatementMock {
     private final LogString log;
+    private final Statement stub = ProxyDelegatorFactory.getProxy(this, Statement.class);
     protected ResultSet resultSet;
 
 
@@ -31,7 +32,7 @@ public class StatementMock {
 
 
     public Statement getStub() {
-        return ProxyDelegatorFactory.getProxy(this, Statement.class);
+        return stub;
     }
 
 
