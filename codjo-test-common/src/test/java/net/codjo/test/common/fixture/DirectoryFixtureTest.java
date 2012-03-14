@@ -4,15 +4,26 @@
  * Copyright (c) 2001 AGF Asset Management.
  */
 package net.codjo.test.common.fixture;
-import net.codjo.test.common.Directory;
-import static net.codjo.test.common.DirectoryTest.deleteRootDirectory;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
 import junit.framework.TestCase;
+import net.codjo.test.common.Directory;
+import net.codjo.test.common.Directory.NotDeletedException;
+import org.junit.Test;
+
+import static net.codjo.test.common.DirectoryTest.deleteRootDirectory;
+import static net.codjo.test.common.matcher.JUnitMatchers.*;
 /**
  * Classe de test de {@link net.codjo.test.common.fixture.DirectoryFixture}.
  */
 public class DirectoryFixtureTest extends TestCase {
     private String rootDirectoryPath;
+    private ExecutorService executor;
 
 
     public void test_temporaryDirectoryFixture() {
@@ -89,9 +100,64 @@ public class DirectoryFixtureTest extends TestCase {
     }
 
 
+    @Test
+    public void test_teardown_retryDelete() throws Exception {
+        executor = Executors.newFixedThreadPool(1);
+
+        DirectoryFixture directory = new DirectoryFixture(rootDirectoryPath);
+        directory.doSetUp();
+
+        FileWriter writer = blockTearDownDelete(directory);
+
+        FutureTask<NotDeletedException> tearDownResultingException = doTearDownInAnotherThread(directory);
+
+        Thread.sleep(40);
+
+        unblockTearDownDelete(writer);
+
+        assertThat(tearDownResultingException.get(), nullValue());
+        assertThat(directory.exists(), is(false));
+    }
+
+
+    private void unblockTearDownDelete(FileWriter writer) throws IOException {
+        writer.close();
+    }
+
+
+    private FileWriter blockTearDownDelete(DirectoryFixture directory) throws IOException {
+        File blockDelete = new File(directory, "block-delete.txt");
+        FileWriter writer = new FileWriter(blockDelete);
+        writer.write("unused");
+        return writer;
+    }
+
+
+    private FutureTask<NotDeletedException> doTearDownInAnotherThread(final DirectoryFixture directory) {
+        FutureTask<NotDeletedException> future = new FutureTask<NotDeletedException>(
+              new Callable<NotDeletedException>() {
+                  public NotDeletedException call() throws InterruptedException {
+                      try {
+                          directory.doTearDown();
+                          return null;
+                      }
+                      catch (NotDeletedException e) {
+                          return e;
+                      }
+                  }
+              });
+
+        executor.execute(future);
+        return future;
+    }
+
+
     @Override
     protected void tearDown() throws Exception {
         deleteRootDirectory(rootDirectoryPath);
+        if (executor != null) {
+            executor.shutdownNow();
+        }
     }
 
 
