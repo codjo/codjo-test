@@ -1,17 +1,26 @@
 package net.codjo.test.common.fixture;
-import net.codjo.test.common.AssertUtil;
 import com.dumbster.smtp.SmtpMessage;
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import javax.activation.DataSource;
+import javax.mail.MessagingException;
+import javax.mail.internet.MimeMultipart;
 import javax.mail.internet.MimeUtility;
 import junit.framework.Assert;
 import junit.framework.AssertionFailedError;
+import net.codjo.test.common.AssertUtil;
 /**
  *
  */
 public class MailMessage {
+    private static final String CONTENT_TRANSFER_ENCODING = "Content-Transfer-Encoding";
     private final SmtpMessage smtpMessage;
 
 
@@ -42,21 +51,101 @@ public class MailMessage {
 
     public String getBody() {
         try {
-            String transferEncoding = smtpMessage.getHeaderValue("Content-Transfer-Encoding");
             String encodedBody = smtpMessage.getBody();
-            if (encodedBody == null || transferEncoding == null) {
+
+            if (encodedBody == null) {
                 return null;
             }
-            InputStream inputStream =
-                  MimeUtility.decode(new ByteArrayInputStream(encodedBody.getBytes()), transferEncoding);
-            BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-            byte[] bytes = new byte[encodedBody.length()];
-            int last = bufferedInputStream.read(bytes);
-            return new String(bytes, 0, last);
+
+            String contentType = smtpMessage.getHeaderValue("Content-Type");
+
+            if ((contentType != null) && (contentType.startsWith("multipart/"))) {
+                return decodeMultipart(0);
+            }
+
+            return decodeSimpleBody(encodedBody, smtpMessage.getHeaderValue(CONTENT_TRANSFER_ENCODING));
         }
         catch (Exception e) {
             throw new IllegalStateException("Impossible de décoder le Body : " + e.getMessage(), e);
         }
+    }
+
+
+    public File getMultipart(int part, String filePath) {
+        if (part == 0) {
+            throw new IllegalStateException("La partie '0' est réservée au body. Utilisez plutôt la méthode getBody().");
+        }
+        try {
+            return generateFileFromAttachment(part, filePath);
+        }
+        catch (Exception e) {
+            throw new IllegalStateException(
+                  "Impossible de décoder la pièce jointe numéro " + part + ". " + e.getMessage(), e);
+        }
+    }
+
+
+    private File generateFileFromAttachment(int part, String filePath) throws MessagingException, IOException {
+        MimeMultipart mimeMultipart = new MimeMultipart(new SmtpMessageDataSource(smtpMessage));
+        if (part < 0 || part > mimeMultipart.getCount() - 1) {
+            throw new IllegalStateException(
+                  "L'index de pièce jointe spécifié (" + part + ") est erroné (nombre de pièces jointes : "
+                  + (mimeMultipart.getCount() - 1) + ")");
+        }
+
+        javax.mail.BodyPart bodyPart = mimeMultipart.getBodyPart(part);
+
+        InputStream source = bodyPart.getInputStream();
+
+        BufferedOutputStream destination = null;
+        try {
+            destination = new BufferedOutputStream(new FileOutputStream(filePath));
+
+            int bufferSize =
+                  (source.available() < 1000000) ? source.available() : 1000000;
+            byte[] buf = new byte[bufferSize];
+
+            int bytesRead;
+            while (source.available() != 0) {
+                bytesRead = source.read(buf);
+
+                destination.write(buf, 0, bytesRead);
+            }
+            destination.flush();
+        }
+        finally {
+            source.close();
+            if (destination != null) {
+                destination.close();
+            }
+        }
+        return new File(filePath);
+    }
+
+
+    private String decodeMultipart(int part) throws MessagingException, IOException {
+        MimeMultipart mimeMultipart = new MimeMultipart(new SmtpMessageDataSource(smtpMessage));
+        javax.mail.BodyPart bodyPart = mimeMultipart.getBodyPart(part);
+
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(bodyPart.getInputStream());
+        byte[] bytes = new byte[bodyPart.getSize()];
+        int last = bufferedInputStream.read(bytes);
+        return new String(bytes, 0, last);
+    }
+
+
+    private String decodeSimpleBody(String encodedBody, String encoding)
+          throws MessagingException, IOException {
+        if (encoding == null) {
+            return null;
+        }
+
+        InputStream inputStream = MimeUtility.decode(new ByteArrayInputStream(encodedBody.getBytes()), encoding);
+
+        BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+        byte[] bytes = new byte[encodedBody.length()];
+        int last = bufferedInputStream.read(bytes);
+        return new String(bytes, 0, last);
     }
 
 
@@ -127,6 +216,40 @@ public class MailMessage {
             Assert.assertEquals("Assert " + headerKey + " - ",
                                 expected,
                                 decodeText(smtpMessage.getHeaderValue(headerKey)));
+        }
+    }
+
+    private class SmtpMessageDataSource implements DataSource {
+        private SmtpMessage message;
+
+
+        private SmtpMessageDataSource(SmtpMessage message) {
+            this.message = message;
+        }
+
+
+        public String getContentType() {
+            String contentType = message.getHeaderValue("Content-Type");
+            return contentType == null
+                   ? "text/plain"
+                   : contentType;
+        }
+
+
+        public String getName() {
+            return message.getHeaderValue("subject");
+        }
+
+
+        public InputStream getInputStream() throws IOException {
+            String body = message.toString();
+// decode the string using platform default encoding because that's how the SmtpMessage was created
+            return new ByteArrayInputStream(body.getBytes());
+        }
+
+
+        public OutputStream getOutputStream() throws IOException {
+            throw new UnsupportedOperationException();
         }
     }
 }
