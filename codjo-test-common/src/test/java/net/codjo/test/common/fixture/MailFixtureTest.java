@@ -226,7 +226,7 @@ public class MailFixtureTest extends TestCase {
 
 
     private String createMultipartFilePath(int part) {
-        return PathUtil.findTestResourcesDirectory(getClass()).getAbsolutePath() + "\\" + "multipart" + part;
+        return PathUtil.findTargetDirectory(getClass()).getAbsolutePath() + File.separatorChar + "multipart" + part;
     }
 
 
