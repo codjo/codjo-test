@@ -31,14 +31,14 @@ public class PackageDependencyTestCaseTest extends TestCase {
     private static class MyPackageDependencyTestCase extends PackageDependencyTestCase {
         public void test_dependency() throws Exception {
             Dependency dependency = createDependency();
-            dependency.assertDependency("dependencyTest_ok.txt");
+            dependency.assertDependency("DependencyTest_ok.txt");
             dependency.assertNoCycle();
         }
 
 
         public void test_dependencyTest() throws Exception {
             Dependency dependency = createTestDependency();
-            dependency.assertDependency("dependencyTest_ok.txt");
+            dependency.assertDependency("DependencyTest_ok.txt");
             dependency.assertNoCycle();
         }
     }
