@@ -55,7 +55,7 @@ public class MailFixtureTest extends TestCase {
 
 
     public void test_assertReceivedMessage() throws Exception {
-        sendMail("darth.Vader", "luke.Skywalker", "révélation", "Je suis ton père");
+        sendMail("darth.Vader", "luke.Skywalker", "révélation", "Je suis ton p\u00E8re");
 
         assertNotNull(mailFixture.getReceivedMessage(0).getSmtpMessage());
 
@@ -63,7 +63,7 @@ public class MailFixtureTest extends TestCase {
               .from("darth.Vader")
               .to("luke.Skywalker")
               .subject("révélation")
-              .bodyContains("père");
+              .bodyContains("p\u00E8re");
 
         assertEquals("révélation", mailFixture.getReceivedMessage(0).getSubject());
     }
@@ -279,7 +279,7 @@ public class MailFixtureTest extends TestCase {
         MimeMultipart multipartMessage = new MimeMultipart();
 
         MimeBodyPart contentsPart = new MimeBodyPart();
-        contentsPart.setContent(body, "text/html; charset=ISO-8859-1");
+        contentsPart.setContent(body, "text/html; charset=UTF-8");
         multipartMessage.addBodyPart(contentsPart);
 
         for (File attachedFile : attachedFiles) {
