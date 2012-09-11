@@ -130,9 +130,26 @@ public class MailMessage {
         BufferedInputStream bufferedInputStream = new BufferedInputStream(bodyPart.getInputStream());
         byte[] bytes = new byte[bodyPart.getSize()];
         int last = bufferedInputStream.read(bytes);
-        return new String(bytes, 0, last);
+        return new String(bytes, 0, last, getCharset(bodyPart));
     }
 
+    private String getCharset(javax.mail.BodyPart bodyPart) throws MessagingException {
+        String charset = "US-ASCII"; // default (see http://stackoverflow.com/questions/1755129/message-charset)
+        String pattern = "charset=";
+        String contentType = bodyPart.getContentType();
+        int begin = contentType.indexOf(pattern);
+        if (begin >= 0) {
+            begin += pattern.length();
+            int end = contentType.indexOf(";", begin);
+            if (end >= 0) {
+                charset = contentType.substring(begin, end);
+            } else {
+                charset = contentType.substring(begin);
+            }
+        }
+
+        return charset.trim();
+    }
 
     private String decodeSimpleBody(String encodedBody, String encoding)
           throws MessagingException, IOException {
