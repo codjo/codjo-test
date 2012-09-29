@@ -31,6 +31,7 @@ import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
 import net.codjo.util.file.FileUtil;
 import org.hamcrest.Description;
+import org.junit.Assert;
 import org.junit.internal.matchers.TypeSafeMatcher;
 import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
@@ -42,8 +43,13 @@ public class IsXsdCompliant extends TypeSafeMatcher<String> {
     private Exception failingValidation;
 
 
-    public IsXsdCompliant(URL xsd) throws IOException {
-        this.xsdContent = FileUtil.loadContent(xsd);
+    public IsXsdCompliant(URL xsd) {
+        try {
+            this.xsdContent = FileUtil.loadContent(xsd);
+        }
+        catch (IOException e) {
+            Assert.fail("Unable to load XSD file from '" + xsd + "' due to : " + e.getLocalizedMessage());
+        }
     }
 
 
@@ -52,7 +58,7 @@ public class IsXsdCompliant extends TypeSafeMatcher<String> {
     }
 
 
-    public static IsXsdCompliant xsdCompliantWith(URL xsd) throws IOException {
+    public static IsXsdCompliant xsdCompliantWith(URL xsd) {
         return new IsXsdCompliant(xsd);
     }
 

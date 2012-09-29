@@ -45,6 +45,17 @@ public class IsXsdCompliantTest {
     }
 
 
+    @Test
+    public void testBadXsdUrl() throws Exception {
+        try {
+            assertThat("<unused/>", is(xsdCompliantWith(new URL("file://well-formated-url/but/inexistant.xsd"))));
+        }
+        catch (AssertionError failureMessage) {
+            assertThat(failureMessage.getMessage(), containsString("Unable to load XSD file from 'file://well-formated-url/but/inexistant.xsd'"));
+        }
+    }
+
+
     private URL xsdFile() {
         return getClass().getResource("IsXsdCompliantTest-simple.xsd");
     }

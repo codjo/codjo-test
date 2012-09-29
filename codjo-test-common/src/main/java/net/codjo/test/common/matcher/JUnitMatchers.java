@@ -1,5 +1,4 @@
 package net.codjo.test.common.matcher;
-import java.io.IOException;
 import java.net.URL;
 import net.codjo.test.common.IsXsdCompliant;
 import org.hamcrest.CoreMatchers;
@@ -59,7 +58,7 @@ public class JUnitMatchers {
     }
 
 
-    public static IsXsdCompliant xsdCompliantWith(URL url) throws IOException {
+    public static IsXsdCompliant xsdCompliantWith(URL url) {
         return IsXsdCompliant.xsdCompliantWith(url);
     }
 
