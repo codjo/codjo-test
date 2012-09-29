@@ -69,7 +69,10 @@ public class IsXsdCompliant extends TypeSafeMatcher<String> {
             Schema schema = factory.newSchema(new StreamSource(new StringReader(xsdContent)));
             Validator validator = schema.newValidator();
 
-            DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+            DocumentBuilderFactory builderFactory = DocumentBuilderFactory.newInstance();
+            builderFactory.setNamespaceAware(true);
+
+            DocumentBuilder parser = builderFactory.newDocumentBuilder();
             Document document = parser.parse(new InputSource(new StringReader(xml)));
             validator.validate(new DOMSource(document));
             return true;
