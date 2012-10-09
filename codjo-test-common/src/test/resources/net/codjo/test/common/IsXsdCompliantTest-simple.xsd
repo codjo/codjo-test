@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified">
+    <xs:element name="release-test" type="release-test-type"/>
+
+    <xs:complexType name="release-test-type"/>
+</xs:schema>

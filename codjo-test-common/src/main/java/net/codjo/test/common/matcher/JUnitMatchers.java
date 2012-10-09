@@ -1,4 +1,6 @@
 package net.codjo.test.common.matcher;
+import java.net.URL;
+import net.codjo.test.common.IsXsdCompliant;
 import org.hamcrest.CoreMatchers;
 import org.hamcrest.Matcher;
 import org.junit.Assert;
@@ -48,6 +50,16 @@ public class JUnitMatchers {
 
     public static void assumeTrue(boolean expected) {
         Assume.assumeTrue(expected);
+    }
+
+
+    public static IsXsdCompliant xsdCompliantWith(String xsdContent) {
+        return IsXsdCompliant.xsdCompliantWith(xsdContent);
+    }
+
+
+    public static IsXsdCompliant xsdCompliantWith(URL url) {
+        return IsXsdCompliant.xsdCompliantWith(url);
     }
 
 
