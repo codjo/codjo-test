@@ -93,15 +93,6 @@ public final class PathUtil {
               .replace(TEST_DIRECTORY, TEST_RESOURCES_DIRECTORY));
     }
 
-    public static String normalize(String path) {
-    	String result;
-    	if (File.separatorChar == '/') {
-    		result = path.replaceAll("\\\\", "/");
-    	} else {
-    		result = path.replaceAll("/", "\\\\");
-    	}
-    	return result;
-    }
 
     public File find(String resourceName) {
         return find(root, resourceName);
