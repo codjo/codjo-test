@@ -79,7 +79,7 @@ public class ExcelComparatorTest {
 
 
     @Test
-    public void test_assertContentAnStyleOk() throws Exception {
+    public void test_assertContentAndStyleOk() throws Exception {
         assertExcelFileOk("actual.xls", "expected_ok.xls",
                           SHEETS_TO_ASSERT_EMPTY_LIST,
                           Arrays.<SheetMatcher>asList(new BorderSheetStyleMatcher(),
@@ -88,7 +88,7 @@ public class ExcelComparatorTest {
 
 
     @Test
-    public void test_assertContentAnStyleKo() throws Exception {
+    public void test_assertContentAndStyleKo() throws Exception {
         final String expectedErrorMessage =
               "Style bordure des cellules de la feuille 'Feuil1' en erreur.\n"
               + "Excel line 1\n"
@@ -134,22 +134,22 @@ public class ExcelComparatorTest {
 
     private void assertExcelFileOk(String actualFilename,
                                    String expectedFilename,
-                                   List<String> sheetsToAssertEmptyList,
-                                   List<SheetMatcher> sheetMatcherEmptyList) throws IOException {
+                                   List<String> sheetsToAssert,
+                                   List<SheetMatcher> sheetMatcherList) throws IOException {
         final HSSFWorkbook actualWorkbook = ExcelUtil.loadWorkbook(new File(getClass().getResource(
               actualFilename).getPath()));
         final HSSFWorkbook expectedWorkbook = ExcelUtil.loadWorkbook(new File(getClass().getResource(
               expectedFilename).getPath()));
 
         Assert.assertTrue(ExcelComparator.execute(expectedWorkbook, actualWorkbook,
-                                                  sheetsToAssertEmptyList, sheetMatcherEmptyList));
+                                                  sheetsToAssert, sheetMatcherList));
     }
 
 
     private void assertExcelFileKo(String actualFilename, String expectedFilename,
                                    String expectedErrorMessage,
-                                   List<String> sheetsToAssertEmptyList,
-                                   List<SheetMatcher> sheetMatcherEmptyList)
+                                   List<String> sheetsToAssert,
+                                   List<SheetMatcher> sheetMatcherList)
           throws IOException {
         final HSSFWorkbook actualWorkbook = ExcelUtil.loadWorkbook(new File(getClass().getResource(
               actualFilename).getPath()));
@@ -157,7 +157,7 @@ public class ExcelComparatorTest {
               expectedFilename).getPath()));
         try {
             ExcelComparator.execute(expectedWorkBook, actualWorkbook,
-                                    sheetsToAssertEmptyList, sheetMatcherEmptyList);
+                                    sheetsToAssert, sheetMatcherList);
             Assert.fail();
         }
         catch (ExcelMatchingException ex) {
