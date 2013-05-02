@@ -1,5 +1,6 @@
 package net.codjo.test.common.excel;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -51,8 +52,8 @@ public class ExcelComparator {
                                   List<String> sheetsToAssert,
                                   List<SheetMatcher> sheetMatcherList) {
 
-        Map<String, HSSFSheet> actualSheets = getSheetToCompare(actualWorkbook, sheetsToAssert);
-        Map<String, HSSFSheet> expectedSheets = getSheetToCompare(expectedWorkbook, sheetsToAssert);
+        Map<String, HSSFSheet> actualSheets = getSheetToCompare(actualWorkbook, sheetsToAssert, false);
+        Map<String, HSSFSheet> expectedSheets = getSheetToCompare(expectedWorkbook, sheetsToAssert, true);
 
         assertSheetNames(actualSheets.keySet(), expectedSheets.keySet());
 
@@ -78,21 +79,50 @@ public class ExcelComparator {
 
 
     private static Map<String, HSSFSheet> getSheetToCompare(HSSFWorkbook excelWorkbook,
-                                                            List<String> sheetNamesToCompare) {
+                                                            List<String> sheetNamesToCompare,
+                                                            boolean sheetNamesMustExist) {
         Map<String, HSSFSheet> sheetsToCompare = new LinkedHashMap<String, HSSFSheet>();
 
+        List<String> missingSheetNames = null;
         Filter filter = new DefaultFilter();
         if (!sheetNamesToCompare.isEmpty()) {
+            if (sheetNamesMustExist) {
+                missingSheetNames = new ArrayList<String>(sheetNamesToCompare);
+            }
             filter = new SheetNameFilter(sheetNamesToCompare);
         }
 
         for (int i = 0; i < excelWorkbook.getNumberOfSheets(); i++) {
             String sheetName = excelWorkbook.getSheetName(i);
+            if (missingSheetNames != null) {
+                missingSheetNames.remove(sheetName);
+            }
+
             if (filter.accept(sheetName)) {
                 sheetsToCompare.put(sheetName, excelWorkbook.getSheetAt(i));
             }
         }
+
+        if ((missingSheetNames != null) && !missingSheetNames.isEmpty()) {
+            throw new ExcelMatchingException("There are no sheet with these names in expected file : " +
+                                             StringUtils.join(quote(missingSheetNames, "'", "'"), ", "));
+        }
+
         return sheetsToCompare;
+    }
+
+
+    public static Collection<String> quote(List<String> list, String prefix, String suffix) {
+        if (list != null) {
+            for (int i = 0; i < list.size(); i++) {
+                String item = list.get(i);
+                if (item != null) {
+                    list.set(i, prefix + item + suffix);
+                }
+            }
+        }
+
+        return list;
     }
 
 

@@ -1,19 +1,31 @@
 package net.codjo.test.common.excel;
-import net.codjo.test.common.excel.matchers.BorderSheetStyleMatcher;
-import net.codjo.test.common.excel.matchers.FontSizeSheetStyleMatcher;
-import net.codjo.test.common.excel.matchers.SheetMatcher;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import net.codjo.test.common.excel.matchers.BorderSheetStyleMatcher;
+import net.codjo.test.common.excel.matchers.FontSizeSheetStyleMatcher;
+import net.codjo.test.common.excel.matchers.SheetMatcher;
+import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoint;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
+import org.junit.runner.RunWith;
 /**
  *
  */
+@RunWith(Theories.class)
 public class ExcelComparatorTest {
+    private static final Logger LOG = Logger.getLogger(ExcelComparatorTest.class);
+
+    @DataPoint
+    public static final String POS_EMPTY = "";
+    @DataPoint
+    public static final String POS_SPACE = " ";
 
     private static final List<String> SHEETS_TO_ASSERT_EMPTY_LIST = Collections.emptyList();
     private static final List<SheetMatcher> SHEET_MATCHER_EMPTY_LIST = Collections.emptyList();
@@ -132,6 +144,19 @@ public class ExcelComparatorTest {
     }
 
 
+    @Theory
+    public void test_assertContentBadSheetNameInExpectedFile(String prefix, String suffix) throws Exception {
+        String wrongSheetName = prefix + "WrongSheetName" + suffix;
+        LOG.info("BEGIN test_assertContentBadSheetNameInExpectedFile with wrongSheetName='" + wrongSheetName + "'");
+        final String expectedErrorMessage =
+              "There are no sheet with these names in expected file : '" + wrongSheetName + "'";
+        assertExcelFileKo("actual.xls", "expected_bad_sheets.xls",
+                          expectedErrorMessage,
+                          Collections.singletonList(wrongSheetName), SHEET_MATCHER_EMPTY_LIST);
+        LOG.info("END test_assertContentBadSheetNameInExpectedFile with wrongSheetName='" + wrongSheetName + "'");
+    }
+
+
     private void assertExcelFileOk(String actualFilename,
                                    String expectedFilename,
                                    List<String> sheetsToAssert,
@@ -158,7 +183,7 @@ public class ExcelComparatorTest {
         try {
             ExcelComparator.execute(expectedWorkBook, actualWorkbook,
                                     sheetsToAssert, sheetMatcherList);
-            Assert.fail();
+            Assert.fail("No exception was thrown with following message :\n" + expectedErrorMessage);
         }
         catch (ExcelMatchingException ex) {
             Assert.assertEquals(expectedErrorMessage,
