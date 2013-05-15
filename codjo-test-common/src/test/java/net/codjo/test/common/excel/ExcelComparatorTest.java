@@ -1,19 +1,31 @@
 package net.codjo.test.common.excel;
-import net.codjo.test.common.excel.matchers.BorderSheetStyleMatcher;
-import net.codjo.test.common.excel.matchers.FontSizeSheetStyleMatcher;
-import net.codjo.test.common.excel.matchers.SheetMatcher;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import net.codjo.test.common.excel.matchers.BorderSheetStyleMatcher;
+import net.codjo.test.common.excel.matchers.FontSizeSheetStyleMatcher;
+import net.codjo.test.common.excel.matchers.SheetMatcher;
+import org.apache.log4j.Logger;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.experimental.theories.DataPoint;
+import org.junit.experimental.theories.Theories;
+import org.junit.experimental.theories.Theory;
+import org.junit.runner.RunWith;
 /**
  *
  */
+@RunWith(Theories.class)
 public class ExcelComparatorTest {
+    private static final Logger LOG = Logger.getLogger(ExcelComparatorTest.class);
+
+    @DataPoint
+    public static final String POS_EMPTY = "";
+    @DataPoint
+    public static final String POS_SPACE = " ";
 
     private static final List<String> SHEETS_TO_ASSERT_EMPTY_LIST = Collections.emptyList();
     private static final List<SheetMatcher> SHEET_MATCHER_EMPTY_LIST = Collections.emptyList();
@@ -79,7 +91,7 @@ public class ExcelComparatorTest {
 
 
     @Test
-    public void test_assertContentAnStyleOk() throws Exception {
+    public void test_assertContentAndStyleOk() throws Exception {
         assertExcelFileOk("actual.xls", "expected_ok.xls",
                           SHEETS_TO_ASSERT_EMPTY_LIST,
                           Arrays.<SheetMatcher>asList(new BorderSheetStyleMatcher(),
@@ -88,7 +100,7 @@ public class ExcelComparatorTest {
 
 
     @Test
-    public void test_assertContentAnStyleKo() throws Exception {
+    public void test_assertContentAndStyleKo() throws Exception {
         final String expectedErrorMessage =
               "Style bordure des cellules de la feuille 'Feuil1' en erreur.\n"
               + "Excel line 1\n"
@@ -132,24 +144,37 @@ public class ExcelComparatorTest {
     }
 
 
+    @Theory
+    public void test_assertContentBadSheetNameInExpectedFile(String prefix, String suffix) throws Exception {
+        String wrongSheetName = prefix + "WrongSheetName" + suffix;
+        LOG.info("BEGIN test_assertContentBadSheetNameInExpectedFile with wrongSheetName='" + wrongSheetName + "'");
+        final String expectedErrorMessage =
+              "There are no sheet with these names in expected file : '" + wrongSheetName + "'";
+        assertExcelFileKo("actual.xls", "expected_bad_sheets.xls",
+                          expectedErrorMessage,
+                          Collections.singletonList(wrongSheetName), SHEET_MATCHER_EMPTY_LIST);
+        LOG.info("END test_assertContentBadSheetNameInExpectedFile with wrongSheetName='" + wrongSheetName + "'");
+    }
+
+
     private void assertExcelFileOk(String actualFilename,
                                    String expectedFilename,
-                                   List<String> sheetsToAssertEmptyList,
-                                   List<SheetMatcher> sheetMatcherEmptyList) throws IOException {
+                                   List<String> sheetsToAssert,
+                                   List<SheetMatcher> sheetMatcherList) throws IOException {
         final HSSFWorkbook actualWorkbook = ExcelUtil.loadWorkbook(new File(getClass().getResource(
               actualFilename).getPath()));
         final HSSFWorkbook expectedWorkbook = ExcelUtil.loadWorkbook(new File(getClass().getResource(
               expectedFilename).getPath()));
 
         Assert.assertTrue(ExcelComparator.execute(expectedWorkbook, actualWorkbook,
-                                                  sheetsToAssertEmptyList, sheetMatcherEmptyList));
+                                                  sheetsToAssert, sheetMatcherList));
     }
 
 
     private void assertExcelFileKo(String actualFilename, String expectedFilename,
                                    String expectedErrorMessage,
-                                   List<String> sheetsToAssertEmptyList,
-                                   List<SheetMatcher> sheetMatcherEmptyList)
+                                   List<String> sheetsToAssert,
+                                   List<SheetMatcher> sheetMatcherList)
           throws IOException {
         final HSSFWorkbook actualWorkbook = ExcelUtil.loadWorkbook(new File(getClass().getResource(
               actualFilename).getPath()));
@@ -157,8 +182,8 @@ public class ExcelComparatorTest {
               expectedFilename).getPath()));
         try {
             ExcelComparator.execute(expectedWorkBook, actualWorkbook,
-                                    sheetsToAssertEmptyList, sheetMatcherEmptyList);
-            Assert.fail();
+                                    sheetsToAssert, sheetMatcherList);
+            Assert.fail("No exception was thrown with following message :\n" + expectedErrorMessage);
         }
         catch (ExcelMatchingException ex) {
             Assert.assertEquals(expectedErrorMessage,
