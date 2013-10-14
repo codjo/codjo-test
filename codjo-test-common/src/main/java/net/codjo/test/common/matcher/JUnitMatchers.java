@@ -73,6 +73,11 @@ public class JUnitMatchers {
     }
 
 
+    public static <T> org.hamcrest.Matcher<java.lang.Iterable<T>> hasNoItem(org.hamcrest.Matcher<? extends T> elementMatcher) {
+        return IsCollectionNotContaining.hasNoItem(elementMatcher);
+    }
+
+
     public static <T> org.hamcrest.Matcher<java.lang.Iterable<T>> hasItems(org.hamcrest.Matcher<? extends T>... elementMatchers) {
         return IsCollectionContaining.hasItems(elementMatchers);
     }
@@ -85,6 +90,11 @@ public class JUnitMatchers {
 
     public static org.hamcrest.Matcher<java.lang.String> containsString(java.lang.String substring) {
         return StringContains.containsString(substring);
+    }
+
+
+    public static org.hamcrest.Matcher<java.lang.String> matches(java.lang.String pattern) {
+        return StringMatches.matches(pattern);
     }
 
 

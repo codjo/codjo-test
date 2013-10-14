@@ -1,10 +1,14 @@
 package net.codjo.test.common;
-import junit.framework.AssertionFailedError;
+import net.codjo.test.common.matcher.JUnitMatchers;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.experimental.theories.Theories;
 import org.junit.experimental.theories.Theory;
 import org.junit.runner.RunWith;
+
+import static junit.framework.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 
 /**
  *
@@ -16,7 +20,7 @@ public class ListAppenderTest extends AbstractListAppenderTest {
         ListAppender appender = ListAppender.createAndAddToRootLogger();
         try {
             appender.setOnlyLevels(restriction.onlyLevels);
-            assertLogged(restriction.logLevel, false, restriction.expectLogs(), appender);
+            assertLogged(restriction.logLevel, false, restriction.expectLogs(), appender, true);
         }
         finally {
             appender.removeFromRootLogger();
@@ -26,7 +30,7 @@ public class ListAppenderTest extends AbstractListAppenderTest {
 
     @Test
     public void testCreateAndAddToRootLogger() throws Exception {
-        assertLogged(false);
+        assertLogged(false, true);
     }
 
 
@@ -65,9 +69,10 @@ public class ListAppenderTest extends AbstractListAppenderTest {
         try {
             String[] lines = logLines();
 
-            appender.matchesOneLine(lines[1]);
+            assertTrue(appender.matchesOneLine(getExpectedLog(lines, true)));
+            assertFalse(appender.matchesOneLine(getExpectedLog(lines, false)));
         }
-        catch (AssertionFailedError afe) {
+        catch (AssertionError afe) {
             appender.printTo(System.out);
             throw afe;
         }
@@ -78,8 +83,91 @@ public class ListAppenderTest extends AbstractListAppenderTest {
 
 
     @Test
+    public void testHasLog_logPresent() throws Exception {
+        new TestTemplate() {
+            @Override
+            protected void runTest(ListAppender appender, String[] lines) throws Exception {
+                try {
+                    appender.assertHasLog(JUnitMatchers.equalTo(getExpectedLog(lines, true)));
+                    //OK
+                }
+                catch (AssertionError afe) {
+                    fail();
+                }
+            }
+        }.run();
+    }
+
+
+    @Test
+    public void testHasLog_logAbsent() throws Exception {
+        new TestTemplate() {
+            @Override
+            protected void runTest(ListAppender appender, String[] lines) throws Exception {
+                boolean error = false;
+                try {
+                    appender.assertHasLog(JUnitMatchers.equalTo(getExpectedLog(lines, false)));
+                    error = true;
+                    Assert.fail();
+                }
+                catch (AssertionError afe) {
+                    if (error) {
+                        throw afe;
+                    }
+                    // else OK
+                }
+            }
+        }.run();
+    }
+
+
+    @Test
+    public void testHasNoLog_logPresent() throws Exception {
+        new TestTemplate() {
+            @Override
+            protected void runTest(ListAppender appender, String[] lines) throws Exception {
+                boolean error = false;
+                try {
+                    appender.assertHasNoLog(JUnitMatchers.equalTo(getExpectedLog(lines, true)));
+                    error = true;
+                    Assert.fail();
+                }
+                catch (AssertionError afe) {
+                    if (error) {
+                        throw afe;
+                    }
+                    // else OK
+                }
+            }
+        }.run();
+    }
+
+
+    @Test
+    public void testHasNoLog_logAbsent() throws Exception {
+        new TestTemplate() {
+            @Override
+            protected void runTest(ListAppender appender, String[] lines) throws Exception {
+                try {
+                    appender.assertHasNoLog(JUnitMatchers.equalTo(getExpectedLog(lines, false)));
+                    // OK
+                }
+                catch (AssertionError afe) {
+                    Assert.fail();
+                }
+            }
+        }.run();
+    }
+
+
+    private String getExpectedLog(String[] lines, boolean existing) {
+        return "INFO: " + (existing ? lines[1] : "line666");
+    }
+
+
+    @Test
     public void testRemoveFromRootLogger() throws Exception {
-        assertLogged(true);
+        assertLogged(true, true);
     }
 
 
@@ -89,10 +177,32 @@ public class ListAppenderTest extends AbstractListAppenderTest {
 
         try {
             logLines();
-            assertLogged(appender, true);
+            assertLogged(appender, true, true);
         }
         finally {
             appender.removeFromRootLogger();
         }
+    }
+
+
+    private static abstract class TestTemplate {
+        public void run() throws Exception {
+            ListAppender appender = ListAppender.createAndAddToRootLogger();
+
+            try {
+                String[] lines = logLines();
+                runTest(appender, lines);
+            }
+            catch (AssertionError afe) {
+                appender.printTo(System.out);
+                throw afe;
+            }
+            finally {
+                appender.removeFromRootLogger();
+            }
+        }
+
+
+        abstract protected void runTest(ListAppender appender, String[] lines) throws Exception;
     }
 }
