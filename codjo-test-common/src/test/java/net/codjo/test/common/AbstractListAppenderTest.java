@@ -22,8 +22,8 @@ abstract public class AbstractListAppenderTest {
     static final String[] LINES = {"line1", "line2", "line3"};
 
 
-    static final String linePrefix(Level level) {
-        return level.toString() + ": ";
+    static final String linePrefix(Level level, boolean usePrefix) {
+        return usePrefix ? (level.toString() + ": ") : "";
     }
 
 
@@ -36,8 +36,11 @@ abstract public class AbstractListAppenderTest {
     public static final Restriction ONLY_ANOTHER_LEVEL = new Restriction(Level.INFO, Level.DEBUG);
     @DataPoint
     public static final Restriction ALL_EXCEPT_LOG_LEVEL = new Restriction(Level.WARN, allExcept(Level.WARN));
+
     @DataPoint
-    public static final Restriction IGNORE_ALL_LEVELS = new Restriction(Level.TRACE);
+    public static final PrefixType WITH_PREFIX = PrefixType.WITH_PREFIX;
+    @DataPoint
+    public static final PrefixType WITHOUT_PREFIX = PrefixType.WITHOUT_PREFIX;
 
 
     public static String[] logLines() {
@@ -54,18 +57,19 @@ abstract public class AbstractListAppenderTest {
     }
 
 
-    void assertLogged(boolean removeAfterAdd) throws Exception {
-        assertLogged(Level.INFO, removeAfterAdd, !removeAfterAdd);
+    void assertLogged(boolean removeAfterAdd, boolean usePrefix) throws Exception {
+        assertLogged(Level.INFO, removeAfterAdd, !removeAfterAdd, usePrefix);
     }
 
 
-    void assertLogged(Level level, boolean removeAfterAdd, boolean expectLogs) throws Exception {
+    void assertLogged(Level level, boolean removeAfterAdd, boolean expectLogs, boolean usePrefix) throws Exception {
         ListAppender appender = ListAppender.createAndAddToRootLogger();
-        assertLogged(level, removeAfterAdd, expectLogs, appender);
+        assertLogged(level, removeAfterAdd, expectLogs, appender, usePrefix);
     }
 
 
-    void assertLogged(Level level, boolean removeAfterAdd, boolean expectLogs, ListAppender appender) throws Exception {
+    void assertLogged(Level level, boolean removeAfterAdd, boolean expectLogs, ListAppender appender, boolean usePrefix)
+          throws Exception {
         Assert.assertNotNull(appender);
 
         if (removeAfterAdd) {
@@ -85,7 +89,7 @@ abstract public class AbstractListAppenderTest {
         String aMessage = "a message";
         getTestLogger().log(level, aMessage);
         if (expectLogs) {
-            Assert.assertEquals("expectedLog", linePrefix(level) + aMessage, appender.toString());
+            Assert.assertEquals("expectedLog", linePrefix(level, usePrefix) + aMessage, appender.toString());
         }
         else {
             Assert.assertEquals("expectedLog", "", appender.toString());
@@ -129,23 +133,35 @@ abstract public class AbstractListAppenderTest {
     }
 
 
-    public static void assertLogged(ListAppender appender, boolean expectLogged) {
-        assertLogged(Level.INFO, appender, expectLogged);
+    public static void assertLogged(ListAppender appender, boolean expectLogged, boolean usePrefix) {
+        assertLogged(Level.INFO, appender, expectLogged, usePrefix);
     }
 
 
-    public static void assertLogged(Level level, ListAppender appender, boolean expectLogged) {
+    public static void assertLogged(Level level, ListAppender appender, boolean expectLogged, boolean usePrefix) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         appender.printTo(new PrintStream(baos));
 
+        String expectedContent = buildExpectedContent(level, expectLogged, usePrefix).toString();
+
+        assertEquals("logContent", expectedContent, baos.toString());
+    }
+
+
+    public static String buildExpectedContent(Level level, boolean expectNotEmpty, boolean usePrefix) {
         StringBuilder expectedContent = new StringBuilder("--- Actual content of logs ---" + LINE_SEPARATOR);
-        if (expectLogged) {
+        if (expectNotEmpty) {
             for (String line : LINES) {
-                expectedContent.append(linePrefix(level) + line + LINE_SEPARATOR);
+                expectedContent.append(linePrefix(level, usePrefix) + line + LINE_SEPARATOR);
             }
         }
         expectedContent.append("--- end of LogString content ---" + LINE_SEPARATOR);
+        return expectedContent.toString();
+    }
 
-        assertEquals("logContent", expectedContent.toString(), baos.toString());
+
+    public static enum PrefixType {
+        WITH_PREFIX,
+        WITHOUT_PREFIX;
     }
 }
