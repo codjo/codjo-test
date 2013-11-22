@@ -8,10 +8,13 @@ import org.apache.log4j.AppenderSkeleton;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.spi.LoggingEvent;
+import org.hamcrest.BaseMatcher;
+import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 
 import static java.lang.System.getProperty;
 import static net.codjo.test.common.matcher.JUnitMatchers.*;
+import static org.junit.Assert.assertEquals;
 import static org.junit.matchers.JUnitMatchers.hasItem;
 
 /**
@@ -27,7 +30,7 @@ public class ListAppender extends AppenderSkeleton {
           Level.FATAL, Level.ERROR, Level.WARN, Level.INFO, Level.DEBUG, Level.TRACE
     });
 
-    private final List<String> logs = new ArrayList<String>();
+    private final List<LogEntry> logs = new ArrayList<LogEntry>();
     private List<Level> onlyLevels;
 
 
@@ -46,30 +49,34 @@ public class ListAppender extends AppenderSkeleton {
     @Override
     protected void append(LoggingEvent event) {
         if ((onlyLevels == null) || (onlyLevels.indexOf(event.getLevel()) >= 0)) {
-            StringBuilder log = new StringBuilder();
-            boolean ignoresThrowable;
-            if (getLayout() == null) {
-                String level = event.getLevel().toString();
-                log.append(level).append(": ").append(event.getMessage());
-                ignoresThrowable = true;
-            }
-            else {
-                ignoresThrowable = getLayout().ignoresThrowable();
-                log.append(getLayout().format(event));
-            }
+            logs.add(new LogEntry(event));
+        }
+    }
 
-            if (!ignoresThrowable) {
-                String lineSeparator = getProperty("line.separator");
-                String[] traces = event.getThrowableStrRep();
-                if (traces != null) {
-                    for (String trace : traces) {
-                        log.append(lineSeparator).append(trace);
-                    }
+
+    private String renderMessage(LoggingEvent event) {
+        StringBuilder log = new StringBuilder();
+        boolean ignoresThrowable;
+        if (getLayout() == null) {
+            String level = event.getLevel().toString();
+            log.append(level).append(": ").append(event.getMessage());
+            ignoresThrowable = true;
+        }
+        else {
+            ignoresThrowable = getLayout().ignoresThrowable();
+            log.append(getLayout().format(event));
+        }
+
+        if (!ignoresThrowable) {
+            String lineSeparator = getProperty("line.separator");
+            String[] traces = event.getThrowableStrRep();
+            if (traces != null) {
+                for (String trace : traces) {
+                    log.append(lineSeparator).append(trace);
                 }
             }
-
-            logs.add(log.toString());
         }
+        return log.toString();
     }
 
 
@@ -92,8 +99,8 @@ public class ListAppender extends AppenderSkeleton {
      */
     public boolean matchesOneLine(String regex) {
         boolean result = false;
-        for (String line : logs) {
-            if (line.matches(regex)) {
+        for (LogEntry logEntry : logs) {
+            if (logEntry.getRenderedMessage().matches(regex)) {
                 result = true;
                 break;
             }
@@ -105,8 +112,8 @@ public class ListAppender extends AppenderSkeleton {
     /**
      * Asserts that the log contains one entry for which the {@link Matcher} returns true.
      */
-    public void assertHasLog(Matcher<String> matcher) {
-        assertHasLog(matcher, null);
+    public void assertHasLog(Matcher<String> messageMatcher) {
+        assertHasLog(messageMatcher, null);
     }
 
 
@@ -116,16 +123,16 @@ public class ListAppender extends AppenderSkeleton {
      *
      * @param transformer The transformer to use for each log entry.
      */
-    public void assertHasLog(Matcher<String> matcher, LogTransformer transformer) {
-        assertThat(transformedLogs(transformer), hasItem(matcher));
+    public void assertHasLog(Matcher<String> messageMatcher, LogTransformer transformer) {
+        assertThat(transformedLogs(transformer), hasItem(messageMatcher));
     }
 
 
     /**
      * Asserts that the log doesn't contain one entry for which the {@link Matcher} returns true.
      */
-    public void assertHasNoLog(Matcher<String> matcher) {
-        assertHasNoLog(matcher, null);
+    public void assertHasNoLog(Matcher<String> messageMatcher) {
+        assertHasNoLog(messageMatcher, null);
     }
 
 
@@ -135,23 +142,38 @@ public class ListAppender extends AppenderSkeleton {
      *
      * @param transformer The transformer to use for each log entry.
      */
-    public void assertHasNoLog(Matcher<String> matcher, LogTransformer transformer) {
-        assertThat(transformedLogs(transformer), hasNoItem(matcher));
+    public void assertHasNoLog(Matcher<String> messageMatcher, LogTransformer transformer) {
+        assertThat(transformedLogs(transformer), hasNoItem(messageMatcher));
+    }
+
+
+    /**
+     * Asserts that the log contains one entry for which the {@link Matcher} returns true.
+     */
+    public void assertHasLog(LogEntryMatcher matcher, Count expectedCount) {
+        int actualCount = 0;
+        for (LogEntry logEntry : logs) {
+            if (matcher.matches(logEntry)) {
+                if (expectedCount.getExpectedCount() == 0) {
+                    fail("At least one log was found for matcher " + matcher.toString());
+                }
+                else {
+                    actualCount++;
+                }
+            }
+        }
+
+        assertEquals("Wrong number of log that " + matcher.toString(), expectedCount.getExpectedCount(), actualCount);
     }
 
 
     private List<String> transformedLogs(LogTransformer transformer) {
-        List<String> result;
-        if (transformer == null) {
-            result = logs;
-        }
-        else {
-            result = new ArrayList<String>(logs.size());
-            for (String log : logs) {
-                String transformed = transformer.transform(log);
-                if (transformed != null) {
-                    result.add(transformed);
-                }
+        List<String> result = new ArrayList<String>(logs.size());
+        for (LogEntry logEntry : logs) {
+            String message = logEntry.getRenderedMessage();
+            String transformed = (transformer == null) ? message : transformer.transform(message);
+            if (transformed != null) {
+                result.add(transformed);
             }
         }
         return result;
@@ -193,8 +215,8 @@ public class ListAppender extends AppenderSkeleton {
      */
     public void printTo(PrintStream out) {
         out.println("--- Actual content of logs ---");
-        for (String line : logs) {
-            out.println(line);
+        for (LogEntry logEntry : logs) {
+            out.println(logEntry);
         }
         out.println("--- end of LogString content ---");
     }
@@ -208,5 +230,138 @@ public class ListAppender extends AppenderSkeleton {
      */
     public void setOnlyLevels(Level... levels) {
         this.onlyLevels = Arrays.asList(levels);
+    }
+
+
+    public class LogEntry {
+        private final String renderedMessage;
+        private final Throwable exception;
+
+
+        private LogEntry(LoggingEvent event) {
+            renderedMessage = renderMessage(event);
+            exception = (event.getThrowableInformation() != null) ?
+                        event.getThrowableInformation().getThrowable() :
+                        null;
+        }
+
+
+        public String getRenderedMessage() {
+            return renderedMessage;
+        }
+
+
+        @Override
+        public String toString() {
+            return renderedMessage;
+        }
+
+
+        public Throwable getException() {
+            return exception;
+        }
+    }
+
+    public static class LogEntryMatcher extends BaseMatcher<LogEntry> implements Matcher<LogEntry> {
+        private final Matcher<String> messageMatcher;
+        private final Matcher<Throwable> exceptionMatcher;
+
+
+        public LogEntryMatcher(Matcher<String> messageMatcher) {
+            this.messageMatcher = messageMatcher;
+            this.exceptionMatcher = null;
+        }
+
+
+        public LogEntryMatcher(final Class<? extends Throwable> exceptionClass, final String exceptionMessage) {
+            this.messageMatcher = null;
+            this.exceptionMatcher = new BaseMatcher<Throwable>() {
+                public boolean matches(Object o) {
+                    Throwable exception = (Throwable)o;
+                    while (exception != null) {
+                        if (matchesClass(exception, exceptionClass) && matchesMessage(exception, exceptionMessage)) {
+                            return true;
+                        }
+                        exception = exception.getCause();
+                    }
+                    return false;
+                }
+
+
+                private boolean matchesMessage(Throwable exception, String exceptionMessage) {
+                    return (exceptionMessage == null) || exceptionMessage.equals(exception.getMessage());
+                }
+
+
+                private boolean matchesClass(Throwable exception, Class<? extends Throwable> exceptionClass) {
+                    return exception.getClass().equals(exceptionClass);
+                }
+
+
+                public void describeTo(Description description) {
+                    description.appendText("match exception(");
+                    description.appendText(exceptionClass.getName());
+                    description.appendText(", '");
+                    description.appendText(exceptionMessage);
+                    description.appendText("')");
+                }
+            };
+        }
+
+
+        public final boolean matches(Object o) {
+            LogEntry logEntry = (LogEntry)o;
+            boolean messageOK = (messageMatcher == null) ? true : messageMatcher.matches(logEntry.getRenderedMessage());
+            boolean exceptionOK = (exceptionMatcher == null) ? true : exceptionMatcher.matches(logEntry.getException());
+            return messageOK && exceptionOK;
+        }
+
+
+        public void describeTo(Description description) {
+            if (messageMatcher != null) {
+                description.appendDescriptionOf(messageMatcher);
+            }
+            if ((messageMatcher != null) && (exceptionMatcher != null)) {
+                description.appendText(" AND ");
+            }
+            if (exceptionMatcher != null) {
+                description.appendDescriptionOf(exceptionMatcher);
+            }
+        }
+
+
+        public static LogEntryMatcher exception(Class<? extends Throwable> exceptionClass, String exceptionMessage) {
+            return new LogEntryMatcher(exceptionClass, exceptionMessage);
+        }
+
+
+        public static LogEntryMatcher exception(Class<? extends Throwable> exceptionClass) {
+            return new LogEntryMatcher(exceptionClass, null);
+        }
+    }
+
+    public static class Count {
+        private static final Count NONE = count(0);
+        private final int expectedCount;
+
+
+        public static Count count(int count) {
+            return new Count(count);
+        }
+
+
+        public static Count none() {
+            return NONE;
+        }
+
+
+        private Count(int expectedCount) {
+            this.expectedCount = expectedCount;
+        }
+
+
+        public int getExpectedCount() {
+            return expectedCount;
+        }
     }
 }
