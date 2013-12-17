@@ -44,14 +44,30 @@ abstract public class AbstractListAppenderTest {
 
 
     public static String[] logLines() {
-        return logLines(Level.INFO);
+        return logLines((Throwable)null);
+    }
+
+
+    public static String[] logLines(Throwable expection) {
+        return logLines(Level.INFO, expection);
     }
 
 
     public static String[] logLines(Level level) {
+        return logLines(level, null);
+    }
+
+
+    public static String[] logLines(Level level, Throwable expection) {
         Logger logger = getTestLogger();
-        for (String line : LINES) {
-            logger.log(level, line);
+        for (int lineNum = 0, linesLength = LINES.length; lineNum < linesLength; lineNum++) {
+            String line = LINES[lineNum];
+            if ((expection != null) && (lineNum == 1)) {
+                logger.log(level, line, expection);
+            }
+            else {
+                logger.log(level, line);
+            }
         }
         return LINES;
     }
