@@ -6,16 +6,22 @@
 package net.codjo.test.common;
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
 /**
  * Représente un répertoire.
  */
 public class Directory extends File {
+    private static final String OS_NAME = System.getProperty("os.name").toLowerCase(Locale.ENGLISH);
+    private static boolean IS_WINDOWS = OS_NAME.contains("windows");
+    private static final int DELETE_RETRY_SLEEP_MILLIS = 10;
     private String lastCreatedSubDirectory;
+
 
     public Directory(String rootPath) {
         super(rootPath);
         lastCreatedSubDirectory = null;
     }
+
 
     public void deleteRecursively() throws NotDeletedException {
         final File[] files = listFiles();
@@ -24,7 +30,7 @@ public class Directory extends File {
                 new Directory(file.getPath()).deleteRecursively();
             }
         }
-        delete();
+        deleteAndRetryOnError();
         if (exists()) {
             throw new NotDeletedException(getPath());
         }
@@ -46,6 +52,28 @@ public class Directory extends File {
     public String lastCreated() {
         return lastCreatedSubDirectory;
     }
+
+
+    private void deleteAndRetryOnError() {
+        if (!delete()) {
+            if (IS_WINDOWS) {
+                System.gc();
+            }
+            waitForAWhile(DELETE_RETRY_SLEEP_MILLIS);
+            delete();
+        }
+    }
+
+
+    protected static void waitForAWhile(int millisToWait) {
+        try {
+            Thread.sleep(millisToWait);
+        }
+        catch (InterruptedException e1) {
+            ;
+        }
+    }
+
 
     /**
      * Exception levée lorsqu'un répertoire ne peut pas être supprimé.
