@@ -50,18 +50,8 @@ public class DirectoryFixture extends Directory implements Fixture {
                 }
                 Logger.getLogger(DirectoryFixture.class).info("Unable to delete " + e.getMessage()
                                                               + ". Retry in 20ms...");
-                waitForAWhile();
+                waitForAWhile(20);
             }
-        }
-    }
-
-
-    private static void waitForAWhile() {
-        try {
-            Thread.sleep(20);
-        }
-        catch (InterruptedException e1) {
-            ;
         }
     }
 }
